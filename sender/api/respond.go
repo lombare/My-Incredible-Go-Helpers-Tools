@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 
-	"gitlab.com/atelias/photos/api/tools/sender"
+	"github.com/lombare/might/sender"
 )
 
 type responseTemplate struct {
