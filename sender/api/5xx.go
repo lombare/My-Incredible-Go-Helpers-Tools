@@ -1,4 +1,4 @@
-package api
+package irsa
 
 import (
 	"net/http"

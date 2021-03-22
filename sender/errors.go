@@ -1,6 +1,7 @@
-package sender
+package irs
 
 import (
+	"fmt"
 	"net/http"
 )
 
@@ -33,9 +34,45 @@ var ResponseStatuses = map[int]Status{
 	NotSupportedContentType: {http.StatusNotAcceptable, "ERRORS/REQUEST/NOT_SUPPORTED_CONTENT_TYPE"},
 }
 
-func AddStatus(httpCode, code int, message string) {
+func AddStatus(code, httpCode int, message string) {
 	ResponseStatuses[httpCode] = Status{
 		code,
 		message,
+	}
+}
+
+
+type NormalError struct {
+	Code    int
+	Message string
+}
+
+func (n NormalError) Error() string {
+	return fmt.Sprint("code:", n.Code, ". message:", n.Message)
+}
+
+func MakeNormalError(code int, message ...interface{}) error {
+	return NormalError{
+		Code:    code,
+		Message: fmt.Sprint(message...),
+	}
+}
+
+type CriticalError struct {
+	NormalError
+	Err error
+}
+
+func (n CriticalError) Error() string {
+	return fmt.Sprint("code:", n.Code, ". message:", n.Message, ". error:", n.Error())
+}
+
+func MakeCriticalError(code int, err error, message ...interface{}) error {
+	return CriticalError{
+		NormalError: NormalError{
+			Code:    code,
+			Message: fmt.Sprint(message...),
+		},
+		Err: err,
 	}
 }

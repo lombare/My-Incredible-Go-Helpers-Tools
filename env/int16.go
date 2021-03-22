@@ -1,63 +1,63 @@
-package env
+package iem
 
 import (
 	"strconv"
 )
 
-func GetInt16(key string) (int16, error) {
+func GetInt8(key string) (int8, error) {
 	v := Get(key)
-	ret, err := strconv.ParseInt(v, 10, 16)
+	ret, err := strconv.ParseInt(v, 10, 8)
 	if err != nil {
 		return 0, err
 	}
-	return int16(ret), nil
+	return int8(ret), nil
 }
 
-func GetDefaultInt16(key string, defValue int16) int16 {
+func GetDefaultInt8(key string, defValue int8) int8 {
 	if !Has(key) {
 		return defValue
 	}
-	v, err := GetInt16(key)
+	v, err := GetInt8(key)
 	if err != nil {
 		return defValue
 	}
 	return v
 }
 
-func MustGetInt16(key string) int16 {
+func MustGetInt8(key string) int8 {
 	v := MustGet(key)
-	ret, err := strconv.ParseInt(v, 10, 16)
+	ret, err := strconv.ParseInt(v, 10, 8)
 	if err != nil {
 		panic(err)
 	}
-	return int16(ret)
+	return int8(ret)
 }
 
-func GetUint16(key string) (uint16, error) {
+func GetUint8(key string) (uint8, error) {
 	v := Get(key)
-	ret, err := strconv.ParseUint(v, 10, 16)
+	ret, err := strconv.ParseUint(v, 10, 8)
 	if err != nil {
 		return 0, err
 	}
-	return uint16(ret), nil
+	return uint8(ret), nil
 }
 
-func GetDefaultUint16(key string, defValue uint16) uint16 {
+func GetDefaultUint8(key string, defValue uint8) uint8 {
 	if !Has(key) {
 		return defValue
 	}
-	v, err := GetUint16(key)
+	v, err := GetUint8(key)
 	if err != nil {
 		return defValue
 	}
 	return v
 }
 
-func MustGetUint16(key string) uint16 {
+func MustGetUint8(key string) uint8 {
 	v := MustGet(key)
-	ret, err := strconv.ParseUint(v, 10, 16)
+	ret, err := strconv.ParseUint(v, 10, 8)
 	if err != nil {
 		panic(err)
 	}
-	return uint16(ret)
+	return uint8(ret)
 }

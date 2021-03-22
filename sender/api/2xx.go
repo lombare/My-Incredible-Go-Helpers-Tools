@@ -1,4 +1,4 @@
-package api
+package irsa
 
 import (
 	"net/http"
@@ -80,7 +80,7 @@ func SendNoContent(c echo.Context, message ...interface{}) error {
 // Returns :
 // 		error :
 // 			The encountered error if there has one. Nil otherwise
-func ReturnResetContent(c echo.Context, body interface{}, message ...interface{}) error {
+func SendResetContent(c echo.Context, body interface{}, message ...interface{}) error {
 	return Send(c, http.StatusResetContent, body, message...)
 }
 
@@ -96,6 +96,6 @@ func ReturnResetContent(c echo.Context, body interface{}, message ...interface{}
 // Returns :
 // 		error :
 // 			The encountered error if there has one. Nil otherwise
-func ReturnPartialContent(c echo.Context, body interface{}, message ...interface{}) error {
+func SendPartialContent(c echo.Context, body interface{}, message ...interface{}) error {
 	return Send(c, http.StatusPartialContent, body, message...)
 }

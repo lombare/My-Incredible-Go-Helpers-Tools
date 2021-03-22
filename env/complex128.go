@@ -1,10 +1,10 @@
-package env
+package iem
 
 import (
 	"strconv"
 )
 
-func  GetComplex128(key string) (complex128, error) {
+func GetComplex128(key string) (complex128, error) {
 	v := Get(key)
 	ret, err := strconv.ParseComplex(v, 128)
 	if err != nil {
@@ -13,7 +13,7 @@ func  GetComplex128(key string) (complex128, error) {
 	return ret, nil
 }
 
-func  GetDefaultComplex128(key string, defValue complex128) complex128 {
+func GetDefaultComplex128(key string, defValue complex128) complex128 {
 	if !Has(key) {
 		return defValue
 	}
@@ -24,7 +24,7 @@ func  GetDefaultComplex128(key string, defValue complex128) complex128 {
 	return v
 }
 
-func  MustGetComplex128(key string) complex128 {
+func MustGetComplex128(key string) complex128 {
 	v := MustGet(key)
 	ret, err := strconv.ParseComplex(v, 128)
 	if err != nil {

@@ -1,4 +1,4 @@
-package api
+package irsa
 
 import (
 	"net/http"
@@ -18,6 +18,20 @@ import (
 // 			The encountered error if there has one. Nil otherwise
 func SendMovedPermanently(c echo.Context, url string) error {
 	return c.Redirect(http.StatusMovedPermanently, url)
+}
+
+// Description :
+//		This function is a short hand for sending a http 302 response
+// Parameters :
+//      c echo.Context :
+//          The current request context from echo. Must never be set to nil.
+//		url string :
+//			The url to redirect
+// Returns :
+// 		error :
+// 			The encountered error if there has one. Nil otherwise
+func SendFound(c echo.Context, url string) error {
+	return c.Redirect(http.StatusFound, url)
 }
 
 // Description :

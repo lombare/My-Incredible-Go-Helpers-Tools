@@ -1,11 +1,10 @@
-package api
+package irss
 
 import (
 	"bufio"
 	"fmt"
 	"io"
 	"net/http"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -16,9 +15,6 @@ func Send(c echo.Context, status int, reader io.Reader, message ...interface{}) 
 		c.Response().Header().Set("X-Request-ID", id.String())
 	}
 	c.Response().Header().Set("X-Message", fmt.Sprint(message...))
-	if t, ok := c.Get("request.time").(time.Time); ok {
-		c.Response().Header().Set("X-Request-Duration", fmt.Sprint(time.Since(t)))
-	}
 
 	// If there is no content then send nothing
 	if reader == nil {

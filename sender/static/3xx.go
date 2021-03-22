@@ -1,4 +1,4 @@
-package api
+package irss
 
 import (
 	"net/http"

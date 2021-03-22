@@ -1,4 +1,4 @@
-package api
+package irss
 
 import (
 	"io"
@@ -81,7 +81,7 @@ func SendNoContent(c echo.Context, message ...interface{}) error {
 // Returns :
 // 		error :
 // 			The encountered error if there has one. Nil otherwise
-func ReturnResetContent(c echo.Context, reader io.Reader, message ...interface{}) error {
+func SendResetContent(c echo.Context, reader io.Reader, message ...interface{}) error {
 	return Send(c, http.StatusResetContent, reader, message...)
 }
 
@@ -97,6 +97,6 @@ func ReturnResetContent(c echo.Context, reader io.Reader, message ...interface{}
 // Returns :
 // 		error :
 // 			The encountered error if there has one. Nil otherwise
-func ReturnPartialContent(c echo.Context, reader io.Reader, message ...interface{}) error {
+func SendPartialContent(c echo.Context, reader io.Reader, message ...interface{}) error {
 	return Send(c, http.StatusPartialContent, reader, message...)
 }

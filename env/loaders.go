@@ -1,4 +1,4 @@
-package env
+package iem
 
 import (
 	"bufio"
@@ -9,16 +9,16 @@ import (
 	"strings"
 )
 
-func TryLoadDotenv(file string) error {
+func LoadDotenv(file string) error {
 	f, err := os.Open(file)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	return TryLoadDotenvReader(f)
+	return LoadDotenvReader(f)
 }
 
-func TryLoadDotenvReader(reader io.Reader) error {
+func LoadDotenvReader(reader io.Reader) error {
 	scanner := bufio.NewScanner(reader)
 
 	for scanner.Scan() {
@@ -39,27 +39,27 @@ func TryLoadDotenvReader(reader io.Reader) error {
 }
 
 func MustLoadDotenv(file string) {
-	if err := TryLoadDotenv(file); err != nil {
+	if err := LoadDotenv(file); err != nil {
 		panic(err)
 	}
 }
 
 func MustLoadDotenvReader(reader io.Reader) {
-	if err := TryLoadDotenvReader(reader); err != nil {
+	if err := LoadDotenvReader(reader); err != nil {
 		panic(err)
 	}
 }
 
-func TryLoadJsonEnv(file string) error {
+func LoadJsonEnv(file string) error {
 	f, err := os.Open(file)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	return TryLoadJsonReader(f)
+	return LoadJsonReader(f)
 }
 
-func TryLoadJsonReader(reader io.Reader) error {
+func LoadJsonReader(reader io.Reader) error {
 	bytes, err := io.ReadAll(reader)
 	if err != nil {
 		return err
@@ -76,26 +76,26 @@ func TryLoadJsonReader(reader io.Reader) error {
 }
 
 func MustLoadJson(file string) {
-	if err := TryLoadJsonEnv(file); err != nil {
+	if err := LoadJsonEnv(file); err != nil {
 		panic(err)
 	}
 }
 
 func MustLoadJsonReader(reader io.Reader) {
-	if err := TryLoadJsonReader(reader); err != nil {
+	if err := LoadJsonReader(reader); err != nil {
 		panic(err)
 	}
 }
 
 func Load(name string) error {
-	if st, err := os.Stat(name + ".env"); err != nil {
+	if st, err := os.Stat(name + ".env"); err != nil && !os.IsNotExist(err) {
 		return err
-	} else if st.Mode().IsRegular() {
-		return TryLoadDotenv(name + ".env")
+	} else if st != nil && st.Mode().IsRegular() {
+		return LoadDotenv(name + ".env")
 	} else if st, err = os.Stat(name + ".env.json"); err != nil {
 		return err
 	} else if st.Mode().IsRegular() {
-		return TryLoadJsonEnv(name + ".env.json")
+		return LoadJsonEnv(name + ".env.json")
 	}
 	return fmt.Errorf("can't find or stat %v.env or %v.env.json", name, name)
 }
