@@ -53,7 +53,7 @@ func Send(c echo.Context, status int, payload interface{}, message ...interface{
 }
 
 func SendCode(c echo.Context, code int, payload ...interface{}) error {
-	status, ok := sender.ResponseStatuses[code]
+	status, ok := irs.ResponseStatuses[code]
 	if !ok {
 		return fmt.Errorf("unknown status code '%v'", code)
 	}
