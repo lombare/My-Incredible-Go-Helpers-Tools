@@ -35,8 +35,8 @@ var ResponseStatuses = map[int]Status{
 }
 
 func AddStatus(code, httpCode int, message string) {
-	ResponseStatuses[httpCode] = Status{
-		code,
+	ResponseStatuses[code] = Status{
+		httpCode,
 		message,
 	}
 }
