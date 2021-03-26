@@ -17,7 +17,13 @@ func SendError(c echo.Context, err error) error {
 		c.Logger().Error("id="+id, fmt.Sprint(e.Err))
 		c.Response().Header().Set("X-Error-Id", id)
 		return Send(c, e.Code, nil, e.Message)
+	} else if e, ok := err.(irs.CriticalError); ok {
+		c.Logger().Error("id="+id, fmt.Sprint(e.Err))
+		c.Response().Header().Set("X-Error-Id", id)
+		return Send(c, e.Code, nil, e.Message)
 	} else if e, ok := err.(*irs.NormalError); ok {
+		return Send(c, e.Code, nil, e.Message)
+	} else if e, ok := err.(irs.NormalError); ok {
 		return Send(c, e.Code, nil, e.Message)
 	} else {
 		c.Logger().Error("id="+id, fmt.Sprint(e))
