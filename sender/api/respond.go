@@ -44,23 +44,23 @@ func Send(c echo.Context, status int, payload interface{}, message ...interface{
 	case "application/xml":
 		fallthrough
 	case "text/xml":
-		return SendXML(c, status, payload, message)
+		return SendXML(c, status, payload, message...)
 	case "application/json":
 		fallthrough
 	default:
-		return SendJSON(c, status, payload, message)
+		return SendJSON(c, status, payload, message...)
 	}
 }
 
-func SendCode(c echo.Context, code int, payload ...interface{}) error {
+func SendCode(c echo.Context, code int, content ...interface{}) error {
 	status, ok := irs.ResponseStatuses[code]
 	if !ok {
 		return fmt.Errorf("unknown status code '%v'", code)
 	}
 
 	var p interface{}
-	if len(payload) != 0 {
-		p = payload[0]
+	if len(content) != 0 {
+		p = content[0]
 	}
 	switch c.Request().Header.Get("accept") {
 	case "application/xml":

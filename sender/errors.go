@@ -41,7 +41,6 @@ func AddStatus(code, httpCode int, message string) {
 	}
 }
 
-
 type NormalError struct {
 	Code    int
 	Message string
@@ -75,4 +74,16 @@ func MakeCriticalError(code int, err error, message ...interface{}) error {
 		},
 		Err: err,
 	}
+}
+
+func MakeCodeError(code int, err ...error) error {
+	status, ok := ResponseStatuses[code]
+	if !ok {
+		return fmt.Errorf("unknown status code '%v'", code)
+	}
+
+	if err != nil && len(err) >= 1 {
+		return MakeCriticalError(status.HttpCode, err[0], status.Message)
+	}
+	return MakeNormalError(status.HttpCode, status.Message)
 }

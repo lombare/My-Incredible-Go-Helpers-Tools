@@ -9,10 +9,10 @@ This package is an assembly of tools I commonly uses. So feel free to contribute
 
 > - [MIGHT -> My Incredible Go Helpers Tools](#might----my-incredible-go-helpers-tools)
 >    * [Purposes](#purposes)
->        + [Incredible env manager](#incredible-env-manager)
->            - [Other cool things](#other-cool-things)
->                * [Env loading](#env-loading)
->                * [Env manipulations](#env-manipulations)
+>    * [Incredible env manager](#incredible-env-manager)
+>        + [Other cool things](#other-cool-things)
+>            - [Env loading](#env-loading)
+>            - [Env manipulations](#env-manipulations)
 >    * [Incredible response simplifier](#incredible-response-simplifier)
 >        + [Subpackages](#subpackages)
 >            - [Incredible Response Simplifier for Api : `irsa`](#incredible-response-simplifier-for-api----irsa-)
@@ -24,7 +24,7 @@ This package is an assembly of tools I commonly uses. So feel free to contribute
 >                    + [Thirdly the error is not handled and is considered as critic](#thirdly-the-error-is-not-handled-and-is-considered-as-critic)
 
 
-### Incredible env manager
+## Incredible env manager
 
 `iem`allows you to manage your programs configurations via the simplest way. The package allows you to get any value via many type of getters.
 
@@ -98,8 +98,46 @@ type responseTemplate struct {
 - Message will contain a string that allow the client to get more informations about what has failed if there is a fail
 - Content contain the response. Aka what the api respond
 
+### Generic error management
 
+`irs` allows you to make some generic errors that you can call from anywhere in your code. That way you are sure that 
+the errors you send will ever be the same, with the same message and the same code.
 
+#### Create a generic error 
+
+Do just like this :
+
+```go
+package whatever
+
+import (
+	"net/http"
+
+	irs "github.com/lombare/might/sender"
+)
+
+const (
+	// It is important to pad your messages. That way you'll never collide any other error type
+	AnyErrorCode = iota + irs.StatusPadding
+)
+
+func Whatever() {
+	irs.AddStatus(AnyErrorCode, http.StatusBadRequest, "You send a bad request because ...")
+}
+```
+
+#### Send a generic error 
+
+```go
+// In our controller 
+func Controller() echo.HandlerFunc {
+    return func(c echo.Context) error {
+        return irsa.SendCode(c, AnyErrorCode)
+    }
+}
+```
+
+> Note that there is a third parameter which is the content if there must be one.
 ### Subpackages
 
 ####  Incredible Response Simplifier for Api : `irsa`
@@ -202,33 +240,139 @@ You can also make the code differs but make them respond the same `httpCode`and 
 
 ##### Custom errors management
 
-Because this is still not enough `irsa` and `irss` gives a method to directly sends errors.
+Because this is still not enough `irs` gives a method to make different kinds of errors.
 
-This function can be used via 3 ways :
+There is 3 functions that allows you to make errors from anywhere.
 
-###### First the error is handled and is "normal" (Like a forbidden access)
+###### MakeNormalError
 
+`MakeNormalError` is a function that makes an error that is as his name say 'normal'. A normal error can be a forbiden access
+for a user that is signed in but has no rights to access something. This is an error that doesn't need any particular attention.
+
+Here is an example of application
 ```go
-func Controller() {
-// Stuff
-return irsa.SendError(c, irs.MakeNormalError(http.StatusForbidden, "Forbidden access"))
+
+func doSomeVerifications() {
+	// Stuff here
+	if !ok {
+        irs.MakeNormalError(http.StatusForbidden, "Forbidden access")
+    }
+    reutrn nil
+}
+
+func Controller(c echo.context) {
+ 
+    err := doSomeVerifications()
+	if err != nil {
+		irsa.SendError(c, err)
+    } 
+    return irsa.SendOk(c, "whatever")
 }
 ```
 
-That way a function called by a controller can setup a response error without have any access to the echo context. This allow error management from anywhere in the application.
+The function `doSomeVerifications()` does not have any access to any echo stuff. But he is now able to throw a specific error.
 
-###### Secondly the error is handled but is critic (like a fail while requesting the database)
+###### MakeCriticalError
 
+`MakeCriticalError` is a function that makes an error that requires developer attention. A good example for this kind of errors
+can be a database access failure.
+
+Here is an example of application
 ```go
-func Controller() {
-// Stuff
-return irsa.SendError(c, irs.MakeCriticalError(http.StatusInternalError, err, "An error occurred"))
+package whatever 
+
+func doSomeVerifications() error {
+	// Stuff here
+	if !ok {
+        irs.MakeNormalError(http.StatusForbidden, "Forbidden access")
+    }
+    reutrn nil
+}
+
+func getSomethingInDatabase() (interface{}, error) {
+	
+	// Suff here
+	data, err := databaseCallThatCanFails()
+	if err != nil {
+		return nil, irs.MakeCriticalError(http.StatusInternalServerError, err, "The database connection fails")
+    }
+	
+    return data, nil
+}
+
+func Controller(c echo.context) {
+ 
+    err := doSomeVerifications()
+	if err != nil {
+		irsa.SendError(c, err)
+    } 
+    
+    data, err := getSomethingInDatabase()
+    if err != nil {
+    	irsa.SendError(c, err)
+    }
+
+    return irsa.SendOk(c, data)
 }
 ```
 
-That makes a response with an http 500 code. But this will add `X-Error-Id`header that identifies a log in the api. That way any developer can have access to the full log of the error without any risk of exposing any sensible information.
+That makes a response with an http 500 code. But this will add `X-Error-Id` header that identifies a log in the api. 
+That way any developer can have access to the full log of the error without any risk of exposing any sensible information in production.
 
-###### Thirdly the error is not handled and is considered as critic
+###### MakeCodeError
+
+This function is made for the really common errors. Such as a not found or anything else.
+The errors building is reduces to his strict minimum :
+
+```go
+package whatever
+
+import irs "github.com/lombare/might/sender"
+
+func doSomeVerifications() error {
+	// Stuff here
+	if !ok {
+		irs.MakeNormalError(http.StatusForbidden, "Forbidden access")
+	}
+	reutrn
+	nil
+}
+
+func getSomethingInDatabase() (interface{}, error) {
+
+	// Suff here
+	data, err := databaseCallThatCanFails()
+	if err != nil {
+		return nil, irs.MakeCriticalError(http.StatusInternalServerError, err, "The database connection fails")
+	}
+
+	// Here we shortened the error to his simplest expression
+	if /* Database failure */ {
+		return nil, irs.MakeCodeError(ReallyCommonDatabaseError)
+	}
+
+	return data, nil
+}
+
+func Controller(c echo.context) {
+
+	err := doSomeVerifications()
+	if err != nil {
+		irsa.SendError(c, err)
+	}
+
+	data, err := getSomethingInDatabase()
+	if err != nil {
+		irsa.SendError(c, err)
+	}
+
+	return irsa.SendOk(c, data)
+}
+```
+
+###### Not handled error
+
+You can send a not handled error with `irsa.SendError`.
 
 ```go
 func Controller() {
