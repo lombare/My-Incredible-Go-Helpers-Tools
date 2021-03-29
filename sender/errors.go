@@ -63,7 +63,11 @@ type CriticalError struct {
 }
 
 func (n CriticalError) Error() string {
-	return fmt.Sprint("code:", n.Code, ". message:", n.Message, ". error:", n.Error())
+	if n.Err != nil {
+		return fmt.Sprint("code:", n.Code, ". message:", n.Message, ". error:", n.Err.Error())
+	} else {
+		return fmt.Sprint("code:", n.Code, ". message:", n.Message, ". error: unknown")
+	}
 }
 
 func MakeCriticalError(code int, err error, message ...interface{}) error {
