@@ -21,7 +21,7 @@ func GetDefault(key, defValue string) string {
 
 func MustGet(key string) string {
 	if !Has(key) {
-		panic(fmt.Errorf("you must provide the variable %v in your environment"))
+		panic(fmt.Errorf("you must provide the variable %v in your environment", key))
 	}
 	return Get(key)
 }
