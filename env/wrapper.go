@@ -14,7 +14,7 @@ func Has(key string) bool {
 }
 
 func Set(key, value string) {
-	if !Has(value) {
+	if !Has(key) {
 		if err := os.Setenv(key, value); err != nil {
 			panic(err)
 		}
