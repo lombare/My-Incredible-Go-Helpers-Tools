@@ -1,3 +1,10 @@
+//
+// filename:  2xx.go
+// author:    Thomas Lombard
+// copyright: Thomas Lombard
+// license:   MIT
+// status:    published
+//
 package irsa
 
 import (
@@ -18,8 +25,8 @@ import (
 // Returns :
 // 		error :
 // 			The encountered error if there has one. Nil otherwise
-func SendOk(c echo.Context, body interface{}, message ...interface{}) error {
-	return Send(c, http.StatusOK, body, message...)
+func SendOk(c echo.Context, body interface{}) error {
+	return Send(c, http.StatusOK, body)
 }
 
 // Description :
@@ -34,8 +41,8 @@ func SendOk(c echo.Context, body interface{}, message ...interface{}) error {
 // Returns :
 // 		error :
 // 			The encountered error if there has one. Nil otherwise
-func SendCreated(c echo.Context, body interface{}, message ...interface{}) error {
-	return Send(c, http.StatusCreated, body, message...)
+func SendCreated(c echo.Context, body interface{}) error {
+	return Send(c, http.StatusCreated, body)
 }
 
 // Description :
@@ -50,8 +57,8 @@ func SendCreated(c echo.Context, body interface{}, message ...interface{}) error
 // Returns :
 // 		error :
 // 			The encountered error if there has one. Nil otherwise
-func SendAccepted(c echo.Context, body interface{}, message ...interface{}) error {
-	return Send(c, http.StatusAccepted, body, message...)
+func SendAccepted(c echo.Context, body interface{}) error {
+	return Send(c, http.StatusAccepted, body)
 }
 
 // Description :
@@ -64,8 +71,8 @@ func SendAccepted(c echo.Context, body interface{}, message ...interface{}) erro
 // Returns :
 // 		error :
 // 			The encountered error if there has one. Nil otherwise
-func SendNoContent(c echo.Context, message ...interface{}) error {
-	return Send(c, http.StatusNoContent, nil, message...)
+func SendNoContent(c echo.Context) error {
+	return Send(c, http.StatusNoContent, nil)
 }
 
 // Description :
@@ -80,8 +87,8 @@ func SendNoContent(c echo.Context, message ...interface{}) error {
 // Returns :
 // 		error :
 // 			The encountered error if there has one. Nil otherwise
-func SendResetContent(c echo.Context, body interface{}, message ...interface{}) error {
-	return Send(c, http.StatusResetContent, body, message...)
+func SendResetContent(c echo.Context, body interface{}) error {
+	return Send(c, http.StatusResetContent, body)
 }
 
 // Description :
@@ -96,6 +103,6 @@ func SendResetContent(c echo.Context, body interface{}, message ...interface{}) 
 // Returns :
 // 		error :
 // 			The encountered error if there has one. Nil otherwise
-func SendPartialContent(c echo.Context, body interface{}, message ...interface{}) error {
-	return Send(c, http.StatusPartialContent, body, message...)
+func SendPartialContent(c echo.Context, body interface{}) error {
+	return Send(c, http.StatusPartialContent, body)
 }

@@ -1,93 +1,69 @@
+//
+// filename:  errors.go
+// author:    Thomas Lombard
+// copyright: Thomas Lombard
+// license:   MIT
+// status:    published
+//
 package irs
 
 import (
 	"fmt"
-	"net/http"
 )
 
-const (
-	Ok      = 0
-	Created = 1
-	Updated = 2
-	Deleted = 3
-
-	BadRequest              = 100
-	NotSupportedAccept      = 101
-	NotSupportedContentType = 102
-
-	StatusPadding = 1000
-)
-
-type Status struct {
-	HttpCode int
-	Message  string
+type HttpError struct {
+	HttpCode int    `json:"httpCode"`
+	ErrCode  Code   `json:"errCode"`
+	Message  string `json:"message"`
 }
 
-var ResponseStatuses = map[int]Status{
-	Ok:      {http.StatusOK, "SUCCESS/OK"},
-	Created: {http.StatusCreated, "SUCCESS/CREATED"},
-	Updated: {http.StatusOK, "SUCCESS/UPDATED"},
-	Deleted: {http.StatusNoContent, "SUCCESS/DELETED"},
-
-	BadRequest:              {http.StatusBadRequest, "ERRORS/REQUEST/BAD_REQUEST"},
-	NotSupportedAccept:      {http.StatusNotAcceptable, "ERRORS/REQUEST/NOT_SUPPORTED_ACCEPT"},
-	NotSupportedContentType: {http.StatusNotAcceptable, "ERRORS/REQUEST/NOT_SUPPORTED_CONTENT_TYPE"},
+func (n HttpError) Error() string {
+	return fmt.Sprint("httpCode:", n.HttpCode, ". message:", n.Message)
 }
 
-func AddStatus(code, httpCode int, message string) {
-	ResponseStatuses[code] = Status{
-		httpCode,
-		message,
+func MakeHttpError(httpCode int, message ...interface{}) error {
+	return HttpError{
+		HttpCode: httpCode,
+		Message:  fmt.Sprint(message...),
 	}
 }
 
-type NormalError struct {
-	Code    int
-	Message string
+type ServerError struct {
+	HttpError
+	Err error `json:"err"`
 }
 
-func (n NormalError) Error() string {
-	return fmt.Sprint("code:", n.Code, ". message:", n.Message)
-}
-
-func MakeNormalError(code int, message ...interface{}) error {
-	return NormalError{
-		Code:    code,
-		Message: fmt.Sprint(message...),
-	}
-}
-
-type CriticalError struct {
-	NormalError
-	Err error
-}
-
-func (n CriticalError) Error() string {
+func (n ServerError) Error() string {
 	if n.Err != nil {
-		return fmt.Sprint("code:", n.Code, ". message:", n.Message, ". error:", n.Err.Error())
+		return fmt.Sprint("httpCode:", n.HttpCode, ". message:", n.Message, ". error:", n.Err.Error())
 	} else {
-		return fmt.Sprint("code:", n.Code, ". message:", n.Message, ". error: unknown")
+		return fmt.Sprint("httpCode:", n.HttpCode, ". message:", n.Message, ". error: unknown")
 	}
 }
 
-func MakeCriticalError(code int, err error, message ...interface{}) error {
-	return CriticalError{
-		NormalError: NormalError{
-			Code:    code,
-			Message: fmt.Sprint(message...),
+func MakeServerError(httpCode int, err error, message ...interface{}) error {
+	if len(message) == 0 {
+		message = []interface{}{
+			Code(httpCode).Message(),
+		}
+	}
+	return ServerError{
+		HttpError: HttpError{
+			HttpCode: httpCode,
+			Message:  fmt.Sprint(message...),
 		},
 		Err: err,
 	}
 }
 
-func MakeCodeError(code int, err ...error) error {
+func MakeCodeError(code Code, err ...error) error {
 	status, ok := ResponseStatuses[code]
 	if !ok {
 		return fmt.Errorf("unknown status code '%v'", code)
 	}
 
 	if err != nil && len(err) >= 1 {
-		return MakeCriticalError(status.HttpCode, err[0], status.Message)
+		return MakeServerError(status.HttpCode, err[0], status.Message)
 	}
-	return MakeNormalError(status.HttpCode, status.Message)
+	return MakeHttpError(status.HttpCode, status.Message)
 }

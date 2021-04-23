@@ -1,3 +1,10 @@
+//
+// filename:  strings.go
+// author:    Thomas Lombard
+// copyright: Thomas Lombard
+// license:   MIT
+// status:    published
+//
 package iem
 
 import (

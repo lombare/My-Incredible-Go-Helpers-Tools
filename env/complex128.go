@@ -1,3 +1,10 @@
+//
+// filename:  complex128.go
+// author:    Thomas Lombard
+// copyright: Thomas Lombard
+// license:   MIT
+// status:    published
+//
 package iem
 
 import (

@@ -1,30 +1,47 @@
 # MIGHT -> My Incredible Go Helpers Tools
 
-
-
-## Purposes
-
-This package is an assembly of tools I commonly uses. So feel free to contribute or give ideas of what to improve.
-
-
 > - [MIGHT -> My Incredible Go Helpers Tools](#might----my-incredible-go-helpers-tools)
 >    * [Purposes](#purposes)
->    * [Incredible env manager](#incredible-env-manager)
+>    * [Still To Do](#still-to-do)
+>    * [Incredible env manager `iem`](#incredible-env-manager)
 >        + [Other cool things](#other-cool-things)
 >            - [Env loading](#env-loading)
 >            - [Env manipulations](#env-manipulations)
->    * [Incredible response simplifier](#incredible-response-simplifier)
->        + [Subpackages](#subpackages)
->            - [Incredible Response Simplifier for Api : `irsa`](#incredible-response-simplifier-for-api----irsa-)
->                * [Wrapped Statuses](#wrapped-statuses)
->                * [Generic errors management](#generic-errors-management)
->                * [Custom errors management](#custom-errors-management)
->                    + [First the error is handled and is "normal" (Like a forbidden access)](#first-the-error-is-handled-and-is--normal---like-a-forbidden-access-)
->                    + [Secondly the error is handled but is critic (like a fail while requesting the database)](#secondly-the-error-is-handled-but-is-critic--like-a-fail-while-requesting-the-database-)
->                    + [Thirdly the error is not handled and is considered as critic](#thirdly-the-error-is-not-handled-and-is-considered-as-critic)
+>    * [Incredible response simplifier `irs`](#incredible-response-simplifier-irs)
+>        + [Generic errors management](#generic-errors-management)
+>            - [Create a generic error](#create-a-generic-error)
+>            - [Send a generic error](#send-a-generic-error)
+>            - [Wrapped methods of `irs`](#wrapped-methods-of-irs)
+>        + [Incredible Response Simplifier for Api : `irsa`](#incredible-response-simplifier-for-api--irsa)
+>        + [Incredible Response Simplifier for Static : `irss`](#incredible-response-simplifier-for-static--irss)
+>        + [Wrapped Statuses by both `irsa` and `irss`](#wrapped-statuses-by-both-irsa-and-irss)
+>            - [Using generic errors](#using-generic-errors)
+>            - [Custom errors management](#custom-errors-management)
+>                    + [MakeHttpError](#makehttperror)
+>                    + [MakeServerError](#makeservererror)
+>                    + [MakeCodeError](#makecodeerror)
+>                    + [Unhandled error](#unhandled-error)
+## Purposes
 
+This package is an assembly of tools I commonly uses. So feel free to contribute.
 
-## Incredible env manager
+## Still to do
+
+- [x] Load env from JSON
+- [ ] Load env from XML
+- [x] Load env from Dotenv `.env`
+- [ ] Load env from Yaml
+- [x] Clear environment
+- [x] Native type getters
+- [ ] Config fallbacks
+- [ ] Variable that can only be retrieved from host environment
+- [ ] Variable that can only be retrieved from config file 
+- [ ] Variable that can only be retrieved from command line
+- [ ] Check env config
+- [ ] Load env to a struct
+- [ ] Handle nested vars (with struct support)
+
+## Incredible env manager `iem`
 
 `iem`allows you to manage your programs configurations via the simplest way. The package allows you to get any value via many type of getters.
 
@@ -33,8 +50,6 @@ Each getter is available in 3 versions
 - `Get___(varname string)` : This method returns the variable, with an error if the value does not exist or if the conversion fails.
 - `GetDefault___(varname string, def any)`: This type of getter returns the variable if it exist or the default value otherwise.
 - `MustGet___(varname string)` : This type of getter returns the value if the variable exists. Panic otherwise.
-
-
 
 This 3 getters are available in 18 versions :
 
@@ -78,30 +93,34 @@ Theses functions adds nothing more as they just wrap some golang native calls. B
 
 
 
-## Incredible response simplifier
+## Incredible response simplifier `irs`
 
-`irs`is a package that gives many functions that are intended to simplify the error management and allow an API to generalize every response.
+`irs` is a package that gives many functions that are intended to simplify the error management and allow an API to generalize every response.
 
-By default `irs`responses are defined by this template :
+By default `irs` responses are defined by this template when there is no error:
 
 ```go
 type responseTemplate struct {
-   HttpCode   int           `json:"httpCode"`
-   HttpStatus string        `json:"httpStatus"`
-   Message    string        `json:"message"`
-   Content    interface{}   `json:"content"`
+    Content    interface{} `json:"content"`
+}
+```
+- Content contain the response. Aka what the api respond
+
+```go
+type errorResponseTemplate struct {
+    ErrCode    irs.Code `json:"errCode"`
+    Message    string   `json:"message"`
 }
 ```
 
-- HttpCode is the code HTTP of the response
-- HttpStatus is a stringified version of the HTTPCode (given by `http.StatusText()`)
-- Message will contain a string that allow the client to get more informations about what has failed if there is a fail
-- Content contain the response. Aka what the api respond
+- ErrCode is the error code of the response (the one in the enum)
+- Message will contain a string that allow the client to get more information about what has failed if there is a fail
 
-### Generic error management
+
+### Generic errors management
 
 `irs` allows you to make some generic errors that you can call from anywhere in your code. That way you are sure that 
-the errors you send will ever be the same, with the same message and the same code.
+the errors you send will ever be the same, with the same message, and the same code.
 
 #### Create a generic error 
 
@@ -118,7 +137,7 @@ import (
 
 const (
 	// It is important to pad your messages. That way you'll never collide any other error type
-	AnyErrorCode = iota + irs.StatusPadding
+	AnyErrorCode irs.Code = iota + irs.StatusPadding
 )
 
 func Whatever() {
@@ -128,23 +147,59 @@ func Whatever() {
 
 #### Send a generic error 
 
+Just returns the code error :
+
 ```go
 // In our controller 
 func Controller() echo.HandlerFunc {
     return func(c echo.Context) error {
-        return irsa.SendCode(c, AnyErrorCode)
+        return AnyErrorCode
     }
 }
 ```
 
-> Note that there is a third parameter which is the content if there must be one.
-### Subpackages
+#### Wrapped methods of `irs`
 
-####  Incredible Response Simplifier for Api : `irsa`
+| Http Code                | Prototype                                                    |
+| ------------------------ | ------------------------------------------------------------ |
+| 301 : Moved Permanently  | `func SendMovedPermanently(c echo.Context, url string) error` |
+| 302 : Found              | `func SendFound(c echo.Context, url string) error`           |
+| 307 : Temporary Redirect | `func SendTemporaryRedirect(c echo.Context, url string) error` |
+| 308 : Permanent Redirect | `func SendPermanentRedirect(c echo.Context, url string) error` |
+
+| Http Code                             | Prototype                                                    |
+| ------------------------------------- | ------------------------------------------------------------ |
+| 400 : Bad Request                     | `func MakeBadRequest(message ...interface{}) error` |
+| 401 : Unauthorized                    | `func MakeUnauthorized(message ...interface{}) error` |
+| 403 : Forbidden                       | `func MakeForbidden(message ...interface{}) error` |
+| 404 : Not Found                       | `func MakeNotFound(message ...interface{}) error` |
+| 405 : Method Not Allowed              | `func MakeMethodNotAllowed(message ...interface{}) error` |
+| 406 : Not Acceptable                  | `func MakeNotAcceptable(message ...interface{}) error` |
+| 408 : Request Timeout                 | `func MakeRequestTimeout(message ...interface{}) error` |
+| 409 : Conflict                        | `func MakeConflict(message ...interface{}) error` |
+| 411 : Length Required                 | `func MakeLengthRequired(message ...interface{}) error` |
+| 413 : Request Entity Too Large        | `func MakeRequestEntityTooLarge(message ...interface{}) error` |
+| 415 : Unsupported Media Type          | `func MakeUnsupportedMediaType(message ...interface{}) error` |
+| 416 : Requested Range Not Satisfiable | `func MakeRequestedRangeNotSatisfiable(message ...interface{}) error` |
+| 418 : Teapot                          | `func MakeTeapot(message ...interface{}) error` |
+
+| Http Code                   | Prototype                                                    |
+| --------------------------- | ------------------------------------------------------------ |
+| 500 : Internal Server Error | `func MakeInternalServerError(message ...interface{}) error` |
+| 501 : Not implemented       | `func MakeNotImplemented(message ...interface{}) error` |
+| 503 : Service Unavailable   | `func MakeServiceUnavailable(message ...interface{}) error` |
+| 507 : Insufficient Storage  | `func MakeInsufficientStorage(message ...interface{}) error` |
+
+
+## Incredible Response Simplifier for Api : `irsa`
 
 This package is build to respond JSON and XML resources (more incoming) as they're build for API.
 
-##### Wrapped Statuses
+## Incredible Response Simplifier for Static : `irss`
+
+This package is build to respond static files resources as it is build to send static files
+
+### Wrapped Statuses by both `irsa` and `irss`
 
 So the most common Api responses are wrapped here is the list :
 
@@ -157,50 +212,15 @@ So the most common Api responses are wrapped here is the list :
 | 205 : Reset Content   | `func SendResetContent(c echo.Context, body interface{}, message ...interface{}) error` |
 | 206 : Partial Content | `func SendPartialContent(c echo.Context, body interface{}, message ...interface{}) error` |
 
-| Http Code                | Prototype                                                    |
-| ------------------------ | ------------------------------------------------------------ |
-| 301 : Moved Permanently  | `func SendMovedPermanently(c echo.Context, url string) error` |
-| 302 : Found              | `func SendFound(c echo.Context, url string) error`           |
-| 307 : Temporary Redirect | `func SendTemporaryRedirect(c echo.Context, url string) error` |
-| 308 : Permanent Redirect | `func SendPermanentRedirect(c echo.Context, url string) error` |
+Note that it is possible to send any other type of http code via the method that these functions wrap :
 
-| Http Code                             | Prototype                                                    |
-| ------------------------------------- | ------------------------------------------------------------ |
-| 400 : Bad Request                     | `func SendBadRequest(c echo.Context, message ...interface{}) error` |
-| 401 : Unauthorized                    | `func SendUnauthorized(c echo.Context, message ...interface{}) error` |
-| 403 : Forbidden                       | `func SendForbidden(c echo.Context, message ...interface{}) error` |
-| 404 : Not Found                       | `func SendNotFound(c echo.Context, message ...interface{}) error` |
-| 405 : Method Not Allowed              | `func SendMethodNotAllowed(c echo.Context, message ...interface{}) error` |
-| 406 : Not Acceptable                  | `func SendNotAcceptable(c echo.Context, message ...interface{}) error` |
-| 408 : Request Timeout                 | `func SendRequestTimeout(c echo.Context, message ...interface{}) error` |
-| 409 : Conflict                        | `func SendConflict(c echo.Context, message ...interface{}) error` |
-| 411 : Length Required                 | `func SendLengthRequired(c echo.Context, message ...interface{}) error` |
-| 413 : Request Entity Too Large        | `func SendRequestEntityTooLarge(c echo.Context, message ...interface{}) error` |
-| 415 : Unsupported Media Type          | `func SendUnsupportedMediaType(c echo.Context, message ...interface{}) error` |
-| 416 : Requested Range Not Satisfiable | `func SendRequestedRangeNotSatisfiable(c echo.Context, message ...interface{}) error` |
-| 418 : Teapot                          | `func SendTeapot(c echo.Context, message ...interface{}) error` |
+```go
+    func Send(c echo.Context, status int, body interface{}) error
+```
 
-| Http Code                   | Prototype                                                    |
-| --------------------------- | ------------------------------------------------------------ |
-| 500 : Internal Server Error | `func SendInternalServerError(c echo.Context, message ...interface{}) error` |
-| 501 : Not implemented       | `func SendNotImplemented(c echo.Context, message ...interface{}) error` |
-| 503 : Service Unavailable   | `func SendServiceUnavailable(c echo.Context, message ...interface{}) error` |
-| 507 : Insufficient Storage  | `func SendInsufficientStorage(c echo.Context, message ...interface{}) error` |
+This method will respond Json or XML depending on the `Accept` header (More incoming).
 
-Note that it is possible to send any other type of error code via the wrapped method of theses calls :
-
-`func Send(c echo.Context, status int, body interface{}, message ...interface{}) error`
-
-This method will respond Json or XML depending on the `Accept`header.
-
-You can explicitly send either Json or XML by calling theses methods :
-
-- `func SendXML(c echo.Context, status int, payload interface{}, message ...interface{}) error`
-- `func SendJSON(c echo.Context, status int, payload interface{}, message ...interface{}) error`
-
-
-
-##### Generic errors management
+##### Using generic errors
 
 It is also possible to skip all theses fastidious steps by calling `SendCode(c echo.Context, code int, payload ...interface{})`. This last method will take a look at the pre-registered responses and use them to respond.
 
@@ -211,14 +231,12 @@ So let's take an example :
 ```go
 // In our main.go
 const (
-	EverythingNice = iota + StatusPadding
-    AnErrorOccurred
+    AnErrorOccurred irs.Code = iota + StatusPadding
 )
 
 func main() {
 	// Whatever ...
-	irs.AddStatus(EverythingNice, http.StatusOk, "SUCCESS/OK").
-    	AddStatus(AnErrorOccurred, http.StatusInternalError, "ERRORS/INTERNAL")
+    AddStatus(AnErrorOccurred, http.StatusInternalError, "ERRORS/INTERNAL")
 }
 
 // In our controller 
@@ -226,17 +244,17 @@ func Controller() echo.HandlerFunc {
     return func(c echo.Context) error {
         
         if /* error */ {
-            return irsa.SendCode(c, AnErrorOccurred)
+            return AnErrorOccurred
         }
         
-        return irsa.SendCode(c, EverythingNice, Data)
+        return irsa.SendOk(c, Data)
     }
 }
 ```
 
 In this case we shorten our error management to his strict minimal. And this method ensures that the errors codes will ever be the same.
 
-You can also make the code differs but make them respond the same `httpCode`and `message`. That way the debug is simplified because it is possible to identify what was the error. Without giving any too sensible information.
+You can also make the `errCode` differs but send the same `httpCode`and `message`. That way the debug is simplified because it is possible to identify what was the error without giving any too sensible information leak.
 
 ##### Custom errors management
 
@@ -244,75 +262,83 @@ Because this is still not enough `irs` gives a method to make different kinds of
 
 There is 3 functions that allows you to make errors from anywhere.
 
-###### MakeNormalError
+###### MakeHttpError
 
-`MakeNormalError` is a function that makes an error that is as his name say 'normal'. A normal error can be a forbiden access
+`MakeHttpError` is a function that makes an error that is intended to explain a normal http error. A normal error can be a forbiden access
 for a user that is signed in but has no rights to access something. This is an error that doesn't need any particular attention.
 
-Here is an example of application
+Here is an example :
 ```go
 
 func doSomeVerifications() {
-	// Stuff here
-	if !ok {
-        irs.MakeNormalError(http.StatusForbidden, "Forbidden access")
+    // Stuff here 
+    if !ok {
+        irs.MakeHttpError(http.StatusForbidden, "Forbidden access")
     }
     reutrn nil
 }
 
 func Controller(c echo.context) {
- 
+
     err := doSomeVerifications()
-	if err != nil {
-		irsa.SendError(c, err)
+    if err != nil {
+        return err
     } 
     return irsa.SendOk(c, "whatever")
 }
 ```
 
-The function `doSomeVerifications()` does not have any access to any echo stuff. But he is now able to throw a specific error.
+The function `doSomeVerifications()` does not have any access to any echo stuff but is now able to throw a specific error.
 
-###### MakeCriticalError
+###### MakeServerError
 
-`MakeCriticalError` is a function that makes an error that requires developer attention. A good example for this kind of errors
-can be a database access failure.
+`MakeServerError` is a function that makes an error that requires developer attention. A good example for this kind of errors can be a database access failure.
 
 Here is an example of application
+
 ```go
-package whatever 
+package whatever
+
+import (
+	"net/http"
+
+	"github.com/labstack/echo/v4"
+	irs "github.com/lombare/might/sender"
+	irsa "github.com/lombare/might/sender/api"
+)
 
 func doSomeVerifications() error {
 	// Stuff here
 	if !ok {
-        irs.MakeNormalError(http.StatusForbidden, "Forbidden access")
-    }
-    reutrn nil
+		return irs.MakeHttpError(http.StatusForbidden, "ERRORS/REQUEST/FORBIDDEN_ACCESS")
+	}
+	return nil
 }
 
 func getSomethingInDatabase() (interface{}, error) {
-	
+
 	// Suff here
-	data, err := databaseCallThatCanFails()
+	data, err := databaseCallThatCanFail()
 	if err != nil {
-		return nil, irs.MakeCriticalError(http.StatusInternalServerError, err, "The database connection fails")
-    }
-	
-    return data, nil
+		return nil, irs.MakeInternalServerError(err, "ERRORS/SERVER/INTERNAL")
+	}
+
+	return data, nil
 }
 
-func Controller(c echo.context) {
- 
-    err := doSomeVerifications()
-	if err != nil {
-		irsa.SendError(c, err)
-    } 
-    
-    data, err := getSomethingInDatabase()
-    if err != nil {
-    	irsa.SendError(c, err)
-    }
+func Controller(c echo.Context) error {
 
-    return irsa.SendOk(c, data)
+	err := doSomeVerifications()
+	if err != nil {
+		return err
+	}
+
+	data, err := getSomethingInDatabase()
+	if err != nil {
+		return err
+	}
+
+	return irsa.SendOk(c, data)
 }
 ```
 
@@ -327,15 +353,21 @@ The errors building is reduces to his strict minimum :
 ```go
 package whatever
 
-import irs "github.com/lombare/might/sender"
+import (
+	"net/http"
+
+	"github.com/labstack/echo/v4"
+	irs "github.com/lombare/might/sender"
+	irsa "github.com/lombare/might/sender/api"
+)
+
 
 func doSomeVerifications() error {
 	// Stuff here
 	if !ok {
-		irs.MakeNormalError(http.StatusForbidden, "Forbidden access")
+		return irs.MakeForbidden()
 	}
-	reutrn
-	nil
+	return nil
 }
 
 func getSomethingInDatabase() (interface{}, error) {
@@ -343,42 +375,33 @@ func getSomethingInDatabase() (interface{}, error) {
 	// Suff here
 	data, err := databaseCallThatCanFails()
 	if err != nil {
-		return nil, irs.MakeCriticalError(http.StatusInternalServerError, err, "The database connection fails")
+		return nil, irs.MakeInternalServerError(err)
 	}
 
 	// Here we shortened the error to his simplest expression
 	if /* Database failure */ {
-		return nil, irs.MakeCodeError(ReallyCommonDatabaseError)
+		return nil, ReallyCommonDatabaseError
 	}
 
 	return data, nil
 }
 
-func Controller(c echo.context) {
+func Controller(c echo.Context) error {
 
 	err := doSomeVerifications()
 	if err != nil {
-		irsa.SendError(c, err)
+		return err
 	}
 
 	data, err := getSomethingInDatabase()
 	if err != nil {
-		irsa.SendError(c, err)
+		return err
 	}
 
 	return irsa.SendOk(c, data)
 }
 ```
 
-###### Not handled error
+###### Unhandled error
 
-You can send a not handled error with `irsa.SendError`.
-
-```go
-func Controller() {
-// Stuff
-return irsa.SendError(c, err)
-}
-```
-
-In this case the http Code is systematically 500 and the message is `Internal error` (because the error wasn't properly handled). And exactly like any critical error an `X-Error-Id`is issued and the full error is logged.
+In this case the error will be considered as a server error. The HttpCode will ever be 500 and the message will ever be `ERRORS/SERVER/INTERNAL`

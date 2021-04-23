@@ -1,4 +1,11 @@
-package irsa
+//
+// filename:  3xx.go
+// author:    Thomas Lombard
+// copyright: Thomas Lombard
+// license:   MIT
+// status:    published
+//
+package irs
 
 import (
 	"net/http"

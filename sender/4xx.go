@@ -1,13 +1,18 @@
-package irsa
+//
+// filename:  4xx.go
+// author:    Thomas Lombard
+// copyright: Thomas Lombard
+// license:   MIT
+// status:    published
+//
+package irs
 
 import (
 	"net/http"
-
-	"github.com/labstack/echo/v4"
 )
 
 // Description :
-//		This function is a short hand for sending a http 400 response
+//		This function is a short hand for sending a http 400 error
 // Parameters :
 //      c echo.Context : Required
 //          The current request context from echo. Must never be set to nil.
@@ -16,12 +21,12 @@ import (
 // Returns :
 // 		error :
 // 			The encountered error if there has one. Nil otherwise
-func SendBadRequest(c echo.Context, message ...interface{}) error {
-	return Send(c, http.StatusBadRequest, nil, message...)
+func MakeBadRequest(message ...interface{}) error {
+	return MakeHttpError(http.StatusBadRequest, message...)
 }
 
 // Description :
-//		This function is a short hand for sending a http 401 response
+//		This function is a short hand for sending a http 401 error
 // Parameters :
 //      c echo.Context : Required
 //          The current request context from echo. Must never be set to nil.
@@ -30,12 +35,12 @@ func SendBadRequest(c echo.Context, message ...interface{}) error {
 // Returns :
 // 		error :
 // 			The encountered error if there has one. Nil otherwise
-func SendUnauthorized(c echo.Context, message ...interface{}) error {
-	return Send(c, http.StatusBadRequest, nil, message...)
+func MakeUnauthorized(message ...interface{}) error {
+	return MakeHttpError(http.StatusBadRequest, message...)
 }
 
 // Description :
-//		This function is a short hand for sending a http 403 response
+//		This function is a short hand for sending a http 403 error
 // Parameters :
 //      c echo.Context : Required
 //          The current request context from echo. Must never be set to nil.
@@ -44,12 +49,12 @@ func SendUnauthorized(c echo.Context, message ...interface{}) error {
 // Returns :
 // 		error :
 // 			The encountered error if there has one. Nil otherwise
-func SendForbidden(c echo.Context, message ...interface{}) error {
-	return Send(c, http.StatusForbidden, nil, message...)
+func MakeForbidden(message ...interface{}) error {
+	return MakeHttpError(http.StatusForbidden, message...)
 }
 
 // Description :
-//		This function is a short hand for sending a http 404 response
+//		This function is a short hand for sending a http 404 error
 // Parameters :
 //      c echo.Context : Required
 //          The current request context from echo. Must never be set to nil.
@@ -58,12 +63,12 @@ func SendForbidden(c echo.Context, message ...interface{}) error {
 // Returns :
 // 		error :
 // 			The encountered error if there has one. Nil otherwise
-func SendNotFound(c echo.Context, message ...interface{}) error {
-	return Send(c, http.StatusForbidden, nil, message...)
+func MakeNotFound(message ...interface{}) error {
+	return MakeHttpError(http.StatusForbidden, message...)
 }
 
 // Description :
-//		This function is a short hand for sending a http 405 response
+//		This function is a short hand for sending a http 405 error
 // Parameters :
 //      c echo.Context : Required
 //          The current request context from echo. Must never be set to nil.
@@ -72,12 +77,12 @@ func SendNotFound(c echo.Context, message ...interface{}) error {
 // Returns :
 // 		error :
 // 			The encountered error if there has one. Nil otherwise
-func SendMethodNotAllowed(c echo.Context, message ...interface{}) error {
-	return Send(c, http.StatusMethodNotAllowed, nil, message...)
+func MakeMethodNotAllowed(message ...interface{}) error {
+	return MakeHttpError(http.StatusMethodNotAllowed, message...)
 }
 
 // Description :
-//		This function is a short hand for sending a http 406 response
+//		This function is a short hand for sending a http 406 error
 // Parameters :
 //      c echo.Context : Required
 //          The current request context from echo. Must never be set to nil.
@@ -86,12 +91,12 @@ func SendMethodNotAllowed(c echo.Context, message ...interface{}) error {
 // Returns :
 // 		error :
 // 			The encountered error if there has one. Nil otherwise
-func SendNotAcceptable(c echo.Context, message ...interface{}) error {
-	return Send(c, http.StatusNotAcceptable, nil, message...)
+func MakeNotAcceptable(message ...interface{}) error {
+	return MakeHttpError(http.StatusNotAcceptable, message...)
 }
 
 // Description :
-//		This function is a short hand for sending a http 408 response
+//		This function is a short hand for sending a http 408 error
 // Parameters :
 //      c echo.Context : Required
 //          The current request context from echo. Must never be set to nil.
@@ -100,12 +105,12 @@ func SendNotAcceptable(c echo.Context, message ...interface{}) error {
 // Returns :
 // 		error :
 // 			The encountered error if there has one. Nil otherwise
-func SendRequestTimeout(c echo.Context, message ...interface{}) error {
-	return Send(c, http.StatusRequestTimeout, nil, message...)
+func MakeRequestTimeout(message ...interface{}) error {
+	return MakeHttpError(http.StatusRequestTimeout, message...)
 }
 
 // Description :
-//		This function is a short hand for sending a http 408 response
+//		This function is a short hand for sending a http 408 error
 // Parameters :
 //      c echo.Context : Required
 //          The current request context from echo. Must never be set to nil.
@@ -114,12 +119,12 @@ func SendRequestTimeout(c echo.Context, message ...interface{}) error {
 // Returns :
 // 		error :
 // 			The encountered error if there has one. Nil otherwise
-func SendConflict(c echo.Context, message ...interface{}) error {
-	return Send(c, http.StatusConflict, nil, message...)
+func MakeConflict(message ...interface{}) error {
+	return MakeHttpError(http.StatusConflict, message...)
 }
 
 // Description :
-//		This function is a short hand for sending a http 411 response
+//		This function is a short hand for sending a http 411 error
 // Parameters :
 //      c echo.Context : Required
 //          The current request context from echo. Must never be set to nil.
@@ -128,12 +133,12 @@ func SendConflict(c echo.Context, message ...interface{}) error {
 // Returns :
 // 		error :
 // 			The encountered error if there has one. Nil otherwise
-func SendLengthRequired(c echo.Context, message ...interface{}) error {
-	return Send(c, http.StatusLengthRequired, nil, message...)
+func MakeLengthRequired(message ...interface{}) error {
+	return MakeHttpError(http.StatusLengthRequired, message...)
 }
 
 // Description :
-//		This function is a short hand for sending a http 413 response
+//		This function is a short hand for sending a http 413 error
 // Parameters :
 //      c echo.Context : Required
 //          The current request context from echo. Must never be set to nil.
@@ -142,12 +147,12 @@ func SendLengthRequired(c echo.Context, message ...interface{}) error {
 // Returns :
 // 		error :
 // 			The encountered error if there has one. Nil otherwise
-func SendRequestEntityTooLarge(c echo.Context, message ...interface{}) error {
-	return Send(c, http.StatusRequestEntityTooLarge, nil, message...)
+func MakeRequestEntityTooLarge(message ...interface{}) error {
+	return MakeHttpError(http.StatusRequestEntityTooLarge, message...)
 }
 
 // Description :
-//		This function is a short hand for sending a http 415 response
+//		This function is a short hand for sending a http 415 error
 // Parameters :
 //      c echo.Context : Required
 //          The current request context from echo. Must never be set to nil.
@@ -156,12 +161,12 @@ func SendRequestEntityTooLarge(c echo.Context, message ...interface{}) error {
 // Returns :
 // 		error :
 // 			The encountered error if there has one. Nil otherwise
-func SendUnsupportedMediaType(c echo.Context, message ...interface{}) error {
-	return Send(c, http.StatusUnsupportedMediaType, nil, message...)
+func MakeUnsupportedMediaType(message ...interface{}) error {
+	return MakeHttpError(http.StatusUnsupportedMediaType, message...)
 }
 
 // Description :
-//		This function is a short hand for sending a http 416 response
+//		This function is a short hand for sending a http 416 error
 // Parameters :
 //      c echo.Context : Required
 //          The current request context from echo. Must never be set to nil.
@@ -170,12 +175,12 @@ func SendUnsupportedMediaType(c echo.Context, message ...interface{}) error {
 // Returns :
 // 		error :
 // 			The encountered error if there has one. Nil otherwise
-func SendRequestedRangeNotSatisfiable(c echo.Context, message ...interface{}) error {
-	return Send(c, http.StatusRequestedRangeNotSatisfiable, nil, message...)
+func MakeRequestedRangeNotSatisfiable(message ...interface{}) error {
+	return MakeHttpError(http.StatusRequestedRangeNotSatisfiable, message...)
 }
 
 // Description :
-//		This function is a short hand for sending a http 418 response
+//		This function is a short hand for sending a http 418 error
 // Parameters :
 //      c echo.Context : Required
 //          The current request context from echo. Must never be set to nil.
@@ -184,6 +189,6 @@ func SendRequestedRangeNotSatisfiable(c echo.Context, message ...interface{}) er
 // Returns :
 // 		error :
 // 			The encountered error if there has one. Nil otherwise
-func SendTeapot(c echo.Context, message ...interface{}) error {
-	return Send(c, http.StatusTeapot, nil, message...)
+func MakeTeapot(message ...interface{}) error {
+	return MakeHttpError(http.StatusTeapot, message...)
 }

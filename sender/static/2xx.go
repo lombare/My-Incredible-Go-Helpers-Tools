@@ -1,3 +1,10 @@
+//
+// filename:  2xx.go
+// author:    Thomas Lombard
+// copyright: Thomas Lombard
+// license:   MIT
+// status:    published
+//
 package irss
 
 import (

@@ -1,3 +1,10 @@
+//
+// filename:  with_stats.go
+// author:    Thomas Lombard
+// copyright: Thomas Lombard
+// license:   MIT
+// status:    published
+//
 package middlewares
 
 import (
